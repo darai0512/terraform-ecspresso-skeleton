@@ -1,0 +1,52 @@
+{
+  "serviceName": "api",
+  "taskDefinition": "{{ tfstatef `module.app['%s'].aws_ecs_cluster.app.name` (must_env `CLUSTER`) }}-api",
+  "launchType": "FARGATE",
+  "healthCheckGracePeriodSeconds": 20,
+  "loadBalancers": [
+    {
+      "targetGroupArn": "{{ tfstatef `module.app['%s'].aws_lb_target_group.api.arn` (must_env `CLUSTER`) }}",
+      "containerName": "api",
+      "containerPort": 800
+    }
+  ],
+  "serviceRegistries": [],
+  "desiredCount": 2,
+  "pendingCount": 0,
+  "platformVersion": "1.4.0",
+  "platformFamily": "Linux",
+  "deploymentConfiguration": {
+    "deploymentCircuitBreaker": {
+      "enable": true,
+      "rollback": true
+    },
+    "maximumPercent": 200,
+    "minimumHealthyPercent": 50
+  },
+  "placementConstraints": [],
+  "placementStrategy": [],
+  "networkConfiguration": {
+    "awsvpcConfiguration": {
+      "subnets": [
+        "{{ tfstatef `aws_subnet.app['a'].id` }}",
+        "{{ tfstatef `aws_subnet.app['c'].id` }}"
+      ],
+      "securityGroups": [
+        "{{ tfstate `aws_security_group.app_api.id` }}",
+        "{{ tfstate `aws_security_group.app_egress.id` }}"
+      ],
+      "assignPublicIp": "DISABLED"
+    }
+  },
+  "schedulingStrategy": "REPLICA",
+  "deploymentController": {
+    "type": "ECS"
+  },
+  "enableECSManagedTags": false,
+  "propagateTags": "NONE",
+  "enableExecuteCommand": false,
+  "serviceConnectConfiguration": {
+    "enabled": true,
+    "namespace": "{{ tfstate `aws_service_discovery_http_namespace.app.arn` }}"
+  }
+}

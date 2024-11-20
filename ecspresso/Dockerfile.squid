@@ -1,0 +1,6 @@
+# arm64 option
+FROM ubuntu/squid:4.10-20.04_beta
+
+COPY squid.conf /etc/squid/squid.conf
+RUN chown root:root /etc/squid/squid.conf && \
+    chmod 0640 /etc/squid/squid.conf

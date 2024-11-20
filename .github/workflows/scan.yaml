@@ -1,0 +1,53 @@
+name: trivy-scan
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+permissions:
+  id-token: write
+  contents: read
+  pull-requests: write
+
+jobs:
+  scan_and_test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone repo
+        uses: actions/checkout@v4
+
+      - name: Test cloudfront functions
+        uses: actions/setup-node@v2
+        with:
+          node-version: 18
+      - run: node functions/*.test.js
+
+      - name: Trivy Scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'config'
+          hide-progress: true
+          exit-code: '1'
+          severity: 'CRITICAL'
+          scan-ref: '.'
+          output: trivy-scan-result.txt
+
+      - name: Format Trivy Scan Result
+        run: |
+          if [ -s trivy-scan-result.txt ]; then
+            # ファイルに内容がある場合
+            echo -e "## 脆弱性スキャン結果\n<details><summary>詳細</summary>\n\n\`\`\`\n$(cat trivy-scan-result.txt)\n\`\`\`\n</details>" > formatted-trivy-result.md
+          else
+            # ファイルが空の場合
+            echo -e "## 脆弱性スキャン結果\n脆弱性が検知されませんでした。" > formatted-trivy-result.md
+          fi
+
+      - name: Comment PR with Trivy scan results
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          recreate: true
+          GITHUB_TOKEN: ${{ secrets.github_token }}
+          path: formatted-trivy-result.md
+

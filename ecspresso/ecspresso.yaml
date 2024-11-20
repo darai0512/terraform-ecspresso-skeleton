@@ -1,0 +1,12 @@
+---
+region: {{ must_env `AWS_REGION` }}
+cluster: {{ must_env `CLUSTER` }}
+service: {{ must_env `SERVICE` }}
+service_definition: {{ must_env `SERVICE` }}.service.json
+task_definition: {{ must_env `SERVICE` }}.taskdefinition.jsonnet
+timeout: 10m0s
+plugins:
+  - name: tfstate
+    config:
+      url: s3://{{ must_env `S3_PATH_BASE` }}/{{ must_env `AWS_PROFILE` }}/terraform.tfstate
+appspec: null
