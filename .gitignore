@@ -1,0 +1,5 @@
+.terraform
+.staged-files
+.info
+.envrc
+.DS_Store
