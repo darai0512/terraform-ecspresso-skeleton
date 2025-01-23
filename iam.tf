@@ -4,31 +4,9 @@ resource "aws_iam_openid_connect_provider" "github" {
   client_id_list = [
     "sts.amazonaws.com",
   ]
-  thumbprint_list = [""] # 固定値。最新verなどで不要？不要化の動きが活発
-}
-#endregion
 
-# Chatbot IAM role
-data "aws_iam_policy_document" "chatbot_assume_role" {
-  statement {
-    effect = "Allow"
-    principals {
-      type        = "Service"
-      identifiers = ["chatbot.amazonaws.com"]
-    }
-    actions = ["sts:AssumeRole"]
-    condition {
-      test     = "StringEquals"
-      variable = "aws:SourceAccount"
-      values   = [data.aws_caller_identity.current.account_id]
-    }
-  }
+  thumbprint_list = [
+    "6938fd4d98bab03faadb97b34396831e3780aea1",
+    "1c58a3a8518e8759bf075b76b750d4f2df264fcd"
+  ]
 }
-resource "aws_iam_role" "AWSChatBotRole" {
-  name               = "AWSChatBotRole"
-  path               = "/service-role/"
-  assume_role_policy = data.aws_iam_policy_document.chatbot_assume_role.json
-}
-
-同時通訳
-電話通訳
